@@ -1,0 +1,79 @@
+﻿@page "/WhiteListToken"
+
+<h1>White-List Address to receive new Token</h1>
+<hr />
+<br />
+<br />
+<div class=" border-dark">Enter the Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
+<div class=" border-dark">Enter the Asset ID: <input class="alert" placeholder="123456..." @bind="assetID" /></div>
+<div class="border-dark"><button class="btn-outline-dark" @onclick="WhiteListAddress">White-List Address</button></div>
+<br />
+<hr />
+<br />
+<div class="alert-danger">@algoStatusMsg</div>
+<br />
+<div class="alert-info">Transaction ID: <a href="https://testnet.algoexplorer.io/tx/@algoTxSuccess" target="_blank"> @algoTxSuccess</a></div>
+<br />
+<div class="alert-info">Asset ID: <a href="https://testnet.algoexplorer.io/asset/@assetID" target="_blank"> @assetID</a></div>
+
+
+
+@code {
+
+    private string sourcePhrase { get; set; }
+    private ulong? assetID { get; set; } = 0;
+
+    private string algoStatusMsg { get; set; }
+    private string algoTxSuccess { get; set; }
+
+    static string algo_address = "http://hackathon.algodev.network:9100";
+    static string algo_api_token = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+
+    private void WhiteListAddress()
+    {
+        try
+        {
+            Algorand.Algod.Client.Api.AlgodApi algoApiInstance = new Algorand.Algod.Client.Api.AlgodApi(algo_address, algo_api_token);
+
+            //create source account from secrete phrase
+            Algorand.Account sourceAccount = null;
+            try
+            {
+                sourceAccount = new Algorand.Account(sourcePhrase);
+            }
+            catch
+            {
+                algoStatusMsg = "Error with your Secret Phrase";
+                return;
+            }
+            //
+            try
+            {
+                //create your tx params
+                var transParams = algoApiInstance.TransactionParams();
+
+                var tx = Algorand.Utils.GetActivateAssetTransaction(sourceAccount.Address, (ulong?)assetID, transParams, "opt in transaction for asset id: " + assetID.ToString());
+
+                Algorand.SignedTransaction signedTx = sourceAccount.SignTransaction(tx);
+                //Algorand.Algod.Client.Model.Account act = null;
+
+                Algorand.Algod.Client.Model.TransactionID id = Algorand.Utils.SubmitTransaction(algoApiInstance, signedTx);
+                algoTxSuccess = id.TxId;
+
+                Algorand.Utils.WaitTransactionToComplete(algoApiInstance, id.TxId);
+                algoStatusMsg = "Successfully White-Listed Address: " + sourceAccount.Address.ToString() + "  To Accept Asset ID # " + assetID.ToString();
+
+                // We can now list the account information for acct3
+                // and see that it can accept the new asseet
+                //act = algoApiInstance.AccountInformation(sourceAccount.Address.ToString());
+            }
+            catch
+            {
+                algoStatusMsg = "Error white-listing your address.";
+                return;
+            }
+        }
+        catch { algoStatusMsg = "Error white-listing your address."; }
+    }
+
+}

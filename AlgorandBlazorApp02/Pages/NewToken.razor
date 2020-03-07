@@ -1,0 +1,105 @@
+﻿@page "/NewToken"
+
+<h1>Create a new Digital Token using the Algorand Testnet</h1>
+<hr />
+<br />
+<br />
+
+<div class=" border-dark">Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
+<div class=" border-dark">Token Name: <input class="alert" placeholder="Token Name..." @bind="tokenName" /></div>
+<div class=" border-dark">Unit Name: <input class="alert" placeholder="ABC,XYZ,..." @bind="unitName" /></div>
+<div class=" border-dark">Default Frozen? <input type="checkbox" class="alert" @bind="defaultFrozen" /></div>
+<div class=" border-dark">Total Amount: <input class="alert" placeholder="Default is 10000..." @bind="totalTokens" /></div>
+<div class=" border-dark">Token URL: <input class="alert" placeholder="www.test.com..." @bind="infoUrl" /></div>
+<div class=" border-dark">Optional memo: <input class="alert" placeholder="Optional memo..." @bind="txNote" /></div>
+<div class="border-dark"><button class="btn-outline-dark" @onclick="createNewToken">Create Token</button></div>
+<br />
+<hr />
+<br />
+<div class="alert-danger">@algoStatusMsg</div>
+<br />
+<div class="alert-info">Transaction ID: <a href="https://testnet.algoexplorer.io/tx/@algoTxSuccess" target="_blank"> @algoTxSuccess</a></div>
+<br />
+<div class="alert-info">New Asset ID: <a href="https://testnet.algoexplorer.io/asset/@assetID" target="_blank"> @assetID</a></div>
+
+
+@code {
+    private string sourcePhrase { get; set; }
+    private string tokenName { get; set; }
+    private string unitName { get; set; }
+    private bool defaultFrozen { get; set; } = false;
+    private int totalTokens { get; set; } = 10000;
+    private string infoUrl { get; set; }
+    private string txNote { get; set; }
+    private ulong? assetID { get; set; } = 0;
+
+    private string algoStatusMsg { get; set; }
+    private string algoTxSuccess { get; set; }
+
+    static string algo_address = "http://hackathon.algodev.network:9100";
+    static string algo_api_token = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+
+    private void createNewToken()
+    {
+        try
+        {
+
+            Algorand.Algod.Client.Api.AlgodApi algoApiInstance = new Algorand.Algod.Client.Api.AlgodApi(algo_address, algo_api_token);
+
+            //create source account from secrete phrase
+            Algorand.Account sourceAccount = null;
+            try
+            {
+                sourceAccount = new Algorand.Account(sourcePhrase);
+            }
+            catch
+            {
+                algoStatusMsg = "Error with your Secret Phrase";
+                throw;
+            }
+
+            //create your tx params
+            var transParams = algoApiInstance.TransactionParams();
+
+
+            var ap = new Algorand.Algod.Client.Model.AssetParams(
+                creator: sourceAccount.Address.ToString(),
+                assetname: tokenName,
+                unitname: unitName,
+                defaultfrozen: defaultFrozen,
+                total: (ulong?)totalTokens,
+                url: infoUrl)
+            //metadatahash: Convert.ToBase64String(Encoding.ASCII.GetBytes("16efaa3924a6fd9d3a4880099a4ac65d")))
+            {
+                Managerkey = sourceAccount.Address.ToString()
+            };
+
+            var tx = Algorand.Utils.GetCreateAssetTransaction(ap, transParams, txNote);
+
+
+            // Sign the Transaction by sender
+            Algorand.SignedTransaction signedTx = sourceAccount.SignTransaction(tx);
+            // send the transaction to the network and
+            // wait for the transaction to be confirmed
+
+            try
+            {
+                Algorand.Algod.Client.Model.TransactionID id = Algorand.Utils.SubmitTransaction(algoApiInstance, signedTx);
+                algoTxSuccess = id.TxId.ToString();
+
+                Algorand.Utils.WaitTransactionToComplete(algoApiInstance, id.TxId);
+                // Now that the transaction is confirmed we can get the assetID
+                Algorand.Algod.Client.Model.Transaction ptx = algoApiInstance.PendingTransactionInformation(id.TxId);
+                assetID = ptx.Txresults.Createdasset;
+                algoStatusMsg = "Successfully created new " + tokenName + " Token on the Algorand Testnet.";
+            }
+            catch
+            {
+                algoStatusMsg = "Error Creating New Token ";
+                throw;
+            }
+        }
+        catch { algoStatusMsg = "Error Creating New Token"; }
+    }
+
+}

@@ -1,0 +1,52 @@
+﻿@page "/NewAddress"
+<h1>Create a new ALGORAND address</h1>
+<hr />
+<br />
+<br />
+
+<button class="btn btn-outline-dark" @onclick="newAddress">Create New Address</button>
+
+<br />
+<br />
+
+<table class="table">
+    <tr>
+        <td width="25%">New Address: </td>
+        <td width="75%"><a href="https://testnet.algoexplorer.io/address/@newAddressString" target="_blank">@newAddressString</a> </td>
+    </tr>
+    <tr>
+        <td>Your Secret Phares: </td>
+        <td>@newAddressPhrase</td>
+    </tr>
+</table>
+<div class="alert-danger">@algoStatusMsg</div>
+
+@code {
+
+    private string newAddressString { get; set; }
+    private string newAddressPhrase { get; set; }
+
+    private string algoStatusMsg { get; set; }
+
+    private void newAddress()
+    {
+        try
+        {
+            //initialte communication
+            //string ALGOD_API_ADDR = "your algod api address";
+            string ALGOD_API_ADDR = "http://hackathon.algodev.network:9100";
+
+            //string ALGOD_API_TOKEN = "your algod api token"; //find in the algod.token
+            string ALGOD_API_TOKEN = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+
+            Algorand.Algod.Client.Api.AlgodApi algodApiInstance = new Algorand.Algod.Client.Api.AlgodApi(ALGOD_API_ADDR, ALGOD_API_TOKEN);
+
+            Algorand.Account newAccount = new Algorand.Account();
+
+            newAddressPhrase = newAccount.ToMnemonic();
+            newAddressString = newAccount.Address.ToString();
+            algoStatusMsg = "Address Created!";
+        }
+        catch { algoStatusMsg = "Error Creating New Address"; }
+    }
+}

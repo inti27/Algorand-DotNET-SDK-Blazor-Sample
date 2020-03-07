@@ -1,0 +1,74 @@
+﻿@page "/AddressInfo"
+
+<h1>View Address Details</h1>
+<hr />
+<br />
+<br />
+<div class=" border-dark">Enter the Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
+<div class="border-dark"><button class="btn-outline-dark" @onclick="ViewAddressInfo">View Details</button></div>
+<hr />
+<br />
+<div class=" border-dark">Account Status:  @addressStatus</div>
+<div class=" border-dark">Account Amount:  @addressAmount</div>
+<div class=" border-dark">Account Rewards:  @addressRewards</div>
+<div class=" border-dark">Account Amount Total:  @addressAmountTotal</div>
+<div class=" border-dark">Account Participation:  @addressParticipation</div>
+<div class=" border-dark">Account Assets:  @addressAssets</div>
+<hr />
+<br />
+<div class="alert-danger">@algoStatusMsg</div>
+<br />
+<div class="alert-info">Address Details: <a href="https://testnet.algoexplorer.io/address/@algoTxSuccess" target="_blank"> @algoTxSuccess</a></div>
+
+
+
+@code {
+    private string sourcePhrase { get; set; }
+    private string addressAmount { get; set; }
+    private string addressAmountTotal { get; set; }
+    private string addressRewards { get; set; }
+    private string addressParticipation { get; set; }
+    private string addressStatus { get; set; }
+    private string addressAssets { get; set; }
+    //private List<string> addressAssets { get; set; } = new List<string>();
+
+    private string algoStatusMsg { get; set; }
+    private string algoTxSuccess { get; set; }
+
+    static string algo_address = "http://hackathon.algodev.network:9100";
+    static string algo_api_token = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+
+    private void ViewAddressInfo()
+    {
+        try
+        {
+            Algorand.Algod.Client.Api.AlgodApi algoApiInstance = new Algorand.Algod.Client.Api.AlgodApi(algo_address, algo_api_token);
+
+            //create source account from secrete phrase
+            Algorand.Account sourceAccount = null;
+            sourceAccount = new Algorand.Account(sourcePhrase);
+            algoTxSuccess = sourceAccount.Address.ToString();
+            Algorand.Algod.Client.Model.Account act = algoApiInstance.AccountInformation(sourceAccount.Address.ToString());
+
+            //add assets to list
+            //var accountAssets = act.Assets.ToList();
+            //foreach (var a in accountAssets)
+            //{
+            //    addressAssets.Add(a.ToString());
+            //}
+            addressAssets = act.Assets.ToString();
+            addressAmount = act.Amountwithoutpendingrewards.ToString();
+            addressAmountTotal = act.Amount.ToString();
+            addressRewards = act.Rewards.ToString();
+            addressParticipation = act.Participation.ToString();
+            addressStatus = act.Status.ToString();
+            algoStatusMsg = act.Assets.ToString();
+        }
+        catch
+        {
+            algoStatusMsg = "Error with your Secret Phrase";
+            return;
+        }
+    }
+
+}

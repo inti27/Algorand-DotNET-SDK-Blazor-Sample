@@ -1,0 +1,108 @@
+﻿@page "/SendAlgo"
+
+<h1>Send some Algo...</h1>
+<hr />
+<br />
+<br />
+<div class=" border-dark">Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
+<div class="border-dark">Destination Address: <input class="alert" placeholder="Destination Address..." @bind="destinationAddress" /></div>
+<div class="border-dark">Ammount: <input class="alert" placeholder="Amount in ALGO..." @bind="amountAlgo" /></div>
+<div class="border-dark">Optional Memo: <input class="alert" placeholder="Memo..." @bind="txMemo" /></div>
+<div class="border-dark"><button class="btn btn-outline-dark" @onclick="SendAlgos">Send Algos... </button></div>
+<br />
+<hr />
+<br />
+<div class="alert-danger">@algoStatusMsg</div>
+<br />
+<div class="alert-info"><a href="https://testnet.algoexplorer.io/tx/@algoTxSuccess" target="_blank"> @algoTxSuccess</a></div>
+
+
+@code {
+
+    private string sourcePhrase { get; set; }
+    private string destinationAddress { get; set; }
+    private string amountAlgo { get; set; }
+    private string txMemo { get; set; }
+
+    private string algoStatusMsg { get; set; }
+    private string algoTxSuccess { get; set; }
+
+    static string algo_address = "http://hackathon.algodev.network:9100";
+    static string algo_api_token = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+
+    private void SendAlgos()
+    {
+        try
+        {
+            Algorand.Algod.Client.Api.AlgodApi algoApiInstance = new Algorand.Algod.Client.Api.AlgodApi(algo_address, algo_api_token);
+            //create source account from secrete phrase
+            Algorand.Account sourceAccount = null;
+
+
+            try
+            {
+                sourceAccount = new Algorand.Account(sourcePhrase);
+            }
+            catch
+            {
+                algoStatusMsg = "Error with your Secret Phrase";
+                throw;
+            }
+
+            //create destination address
+            Algorand.Address destAlgoAddress = null;
+            try
+            {
+                destAlgoAddress = new Algorand.Address(destinationAddress);
+            }
+            catch
+            {
+                algoStatusMsg = "Error with your Destination Address";
+                throw;
+            }
+
+            //get the amount to send
+            double finalAmount = 0.0;
+            try
+            {
+                finalAmount = double.Parse(amountAlgo);
+            }
+            catch
+            {
+                algoStatusMsg = "Error with your Amount";
+                throw;
+            }
+
+            //get transaction params
+            Algorand.Algod.Client.Model.TransactionParams transParams = null;
+            try
+            {
+                transParams = algoApiInstance.TransactionParams();
+            }
+            catch
+            {
+                algoStatusMsg = "Error getting the API Transaction Params";
+                throw;
+            }
+
+            //prepare transaction details
+            var amount = Algorand.Utils.AlgosToMicroalgos(finalAmount);
+            var tx = Algorand.Utils.GetPaymentTransaction(sourceAccount.Address, destAlgoAddress, amount, txMemo, transParams);
+            var signedTx = sourceAccount.SignTransaction(tx);
+
+            // send the transaction to the network
+            try
+            {
+                var id = Algorand.Utils.SubmitTransaction(algoApiInstance, signedTx);
+                algoStatusMsg = "Successfully sent tx with id: " + id.TxId;
+                algoTxSuccess = id.TxId;
+            }
+            catch (Algorand.Algod.Client.ApiException e)
+            {
+                algoStatusMsg = "Exception when calling algod#rawTransaction: " + e.Message;
+                throw;
+            }
+        }
+        catch { }
+    }
+}
