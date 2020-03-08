@@ -9,16 +9,34 @@
     <PackageReference Include="Algorand" Version="0.1.2.3" />
   </ItemGroup>
   <ItemGroup>
-    <Content Remove="Pages\DestroyToken.razor" />
-    <Content Remove="Pages\SignToken.razor" />
-    <Content Remove="Pages\FreezeToken.razor" />
     <Content Remove="langspec.json" />
-    <Content Remove="Pages\FreezeToken.razor" />
-    <Content Remove="Pages\DestroyToken.razor" />
+    <Content Remove="wwwroot\Images\1200px-.NET_Core_Logo.png" />
+    <Content Remove="wwwroot\Images\algologo1.png" />
+    <Content Remove="wwwroot\Images\Algorand-logo.jpg" />
+    <Content Remove="wwwroot\Images\blazorlogo.png" />
+    <Content Remove="wwwroot\Images\blazorms-675x360.jpg" />
+    <Content Remove="wwwroot\Images\netcorelogo.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Pages\SignToken.razor">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\Images\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\Images\1200px-.NET_Core_Logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\Images\algologo1.png" />
+    <None Include="wwwroot\Images\Algorand-logo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\Images\blazorlogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\Images\blazorms-675x360.jpg" />
+    <None Include="wwwroot\Images\netcorelogo.jpg" />
   </ItemGroup>
 </Project>
