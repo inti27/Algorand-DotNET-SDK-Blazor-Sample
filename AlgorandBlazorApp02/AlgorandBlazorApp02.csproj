@@ -8,4 +8,17 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Algorand" Version="0.1.2.3" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="Pages\DestroyToken.razor" />
+    <Content Remove="Pages\SignToken.razor" />
+    <Content Remove="Pages\FreezeToken.razor" />
+    <Content Remove="langspec.json" />
+    <Content Remove="Pages\FreezeToken.razor" />
+    <Content Remove="Pages\DestroyToken.razor" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="Pages\SignToken.razor">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
