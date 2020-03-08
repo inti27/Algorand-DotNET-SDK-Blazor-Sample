@@ -1,6 +1,6 @@
-﻿@page "/WhiteListToken"
+﻿@page "/DestroyToken"
 
-<h1>White-List Address to receive new Token</h1>
+<h1>Destroy Your Token</h1>
 <hr />
 <br />
 <br />
@@ -9,7 +9,7 @@
 <div class=" border-dark">Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
 <div class=" border-dark">Asset ID: <input class="alert" placeholder="123456..." @bind="assetID" /></div>
 <div class=" border-dark">Optional memo: <input class="alert" placeholder="Optional memo..." @bind="txNote" /></div>
-<div class="border-dark"><button class="btn-outline-dark" @onclick="WhiteListAddress">White-List Address</button></div>
+<div class="border-dark"><button class="btn-outline-dark" @onclick="destroyAccount">Destroy Address</button></div>
 <br />
 <hr />
 <br />
@@ -20,20 +20,17 @@
 <div class="alert-info">Asset ID: <a href="https://testnet.algoexplorer.io/asset/@assetID" target="_blank"> @assetID</a></div>
 
 
-
 @code {
-
     private string sourcePhrase { get; set; }
     private ulong? assetID { get; set; } = 0;
-    private string txNote { get; set; }
+    private string txNote { get; set; } = string.Empty;
     private string algoStatusMsg { get; set; }
     private string algoTxSuccess { get; set; }
 
     static string algo_address { get; set; } = "http://hackathon.algodev.network:9100";
     static string algo_api_token { get; set; } = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
 
-
-    private void WhiteListAddress()
+    private void destroyAccount()
     {
         try
         {
@@ -56,7 +53,7 @@
                 //create your tx params
                 var transParams = algoApiInstance.TransactionParams();
 
-                var tx = Algorand.Utils.GetActivateAssetTransaction(sourceAccount.Address, (ulong?)assetID, transParams, "opt in transaction for asset id: " + assetID.ToString() + txNote);
+                var tx = Algorand.Utils.GetDestroyAssetTransaction(sourceAccount.Address, assetID, transParams, txNote);
 
                 Algorand.SignedTransaction signedTx = sourceAccount.SignTransaction(tx);
                 //Algorand.Algod.Client.Model.Account act = null;
@@ -65,7 +62,7 @@
                 algoTxSuccess = id.TxId;
 
                 Algorand.Utils.WaitTransactionToComplete(algoApiInstance, id.TxId);
-                algoStatusMsg = "Successfully White-Listed Address: " + sourceAccount.Address.ToString() + "  To Accept Asset ID # " + assetID.ToString();
+                algoStatusMsg = "Destroyed Asset ID # " + assetID.ToString();
 
                 // We can now list the account information for acct3
                 // and see that it can accept the new asseet
@@ -73,11 +70,10 @@
             }
             catch
             {
-                algoStatusMsg = "Error white-listing your address.";
+                algoStatusMsg = "Error destroying your token.";
                 return;
             }
         }
-        catch { algoStatusMsg = "Error white-listing your address."; }
+        catch { algoStatusMsg = "Error destroying your token."; }
     }
-
 }

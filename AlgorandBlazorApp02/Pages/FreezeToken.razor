@@ -1,0 +1,91 @@
+﻿@page "/FreezeToken"
+
+<h1>Freeze Address to stop receiving Token</h1>
+<hr />
+<br />
+<br />
+<div style="width:100%" class=" border-dark">Node Address: <input width="500" class="alert" placeholder=" http://hackathon.algodev.network:9100" @bind="algo_address" /></div>
+<div style="width:100%" class=" border-dark">API Token: <input width="500" class="alert" placeholder="ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1" @bind="algo_api_token" /></div>
+<div class=" border-dark">Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
+<div class=" border-dark">Address to Freeze <input class="alert" placeholder="Algo address..." @bind="freezeAddress" /></div>
+<div class=" border-dark">Asset ID: <input class="alert" placeholder="123456..." @bind="assetID" /></div>
+<div class=" border-dark">Optional memo: <input class="alert" placeholder="Optional memo..." @bind="txNote" /></div>
+<div class="border-dark"><button class="btn-outline-dark" @onclick="freezeAccount">Freeze Address</button></div>
+<br />
+<hr />
+<br />
+<div class="alert-danger">@algoStatusMsg</div>
+<br />
+<div class="alert-info">Transaction ID: <a href="https://testnet.algoexplorer.io/tx/@algoTxSuccess" target="_blank"> @algoTxSuccess</a></div>
+<br />
+<div class="alert-info">Asset ID: <a href="https://testnet.algoexplorer.io/asset/@assetID" target="_blank"> @assetID</a></div>
+
+
+@code {
+    private string sourcePhrase { get; set; }
+    private ulong? assetID { get; set; } = 0;
+    private string freezeAddress { get; set; }
+    private string txNote { get; set; }
+    private string algoStatusMsg { get; set; }
+    private string algoTxSuccess { get; set; }
+
+    static string algo_address { get; set; } = "http://hackathon.algodev.network:9100";
+    static string algo_api_token { get; set; } = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+
+    private void freezeAccount()
+    {
+        try
+        {
+            Algorand.Algod.Client.Api.AlgodApi algoApiInstance = new Algorand.Algod.Client.Api.AlgodApi(algo_address, algo_api_token);
+
+            //create source account from secrete phrase
+            Algorand.Account sourceAccount = null;
+            try
+            {
+                sourceAccount = new Algorand.Account(sourcePhrase);
+            }
+            catch
+            {
+                algoStatusMsg = "Error with your Secret Phrase";
+                return;
+            }
+            Algorand.Address addressToFreeze = null;
+            try
+            {
+                addressToFreeze = new Algorand.Address(freezeAddress);
+            }
+            catch
+            {
+                algoStatusMsg = "Error with your Address";
+                return;
+            }
+            //
+            try
+            {
+                //create your tx params
+                var transParams = algoApiInstance.TransactionParams();
+
+                var tx = Algorand.Utils.GetFreezeAssetTransaction(sourceAccount.Address, addressToFreeze, assetID, true, transParams, txNote);
+
+                Algorand.SignedTransaction signedTx = sourceAccount.SignTransaction(tx);
+                //Algorand.Algod.Client.Model.Account act = null;
+
+                Algorand.Algod.Client.Model.TransactionID id = Algorand.Utils.SubmitTransaction(algoApiInstance, signedTx);
+                algoTxSuccess = id.TxId;
+
+                Algorand.Utils.WaitTransactionToComplete(algoApiInstance, id.TxId);
+                algoStatusMsg = "Successfully Froze Address: " + sourceAccount.Address.ToString() + "  To Stop Accepting Asset ID # " + assetID.ToString();
+
+                // We can now list the account information for acct3
+                // and see that it can accept the new asseet
+                //act = algoApiInstance.AccountInformation(sourceAccount.Address.ToString());
+            }
+            catch
+            {
+                algoStatusMsg = "Error freezing your address.";
+                return;
+            }
+        }
+        catch { algoStatusMsg = "Error freezing your address."; }
+    }
+}
