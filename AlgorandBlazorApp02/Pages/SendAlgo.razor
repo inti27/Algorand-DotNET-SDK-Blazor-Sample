@@ -1,9 +1,12 @@
-﻿@page "/SendAlgo"
+﻿@using AlgorandBlazorApp02.Data
+@page "/SendAlgo"
 
 <h1>Send some Algo...</h1>
 <hr />
 <br />
 <br />
+<div class=" border-dark">Node Address: <input class="alert" placeholder="Default is http://hackathon.algodev.network:9100" @bind="algo_address" /></div>
+<div class=" border-dark">API Token: <input class="alert" placeholder="Default is ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1" @bind-value="algo_api_token" /></div>
 <div class=" border-dark">Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
 <div class="border-dark">Destination Address: <input class="alert" placeholder="Destination Address..." @bind="destinationAddress" /></div>
 <div class="border-dark">Ammount: <input class="alert" placeholder="Amount in ALGO..." @bind="amountAlgo" /></div>
@@ -27,8 +30,9 @@
     private string algoStatusMsg { get; set; }
     private string algoTxSuccess { get; set; }
 
-    static string algo_address = "http://hackathon.algodev.network:9100";
-    static string algo_api_token = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+    static string algo_address { get; set; } = "http://hackathon.algodev.network:9100";
+    static string algo_api_token { get; set; } = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+
 
     private void SendAlgos()
     {
@@ -65,7 +69,7 @@
             double finalAmount = 0.0;
             try
             {
-                finalAmount = double.Parse(amountAlgo);
+                finalAmount = double.Parse(amountAlgo.ToString());
             }
             catch
             {

@@ -4,7 +4,8 @@
 <hr />
 <br />
 <br />
-
+<div style="width:100%" class=" border-dark">Node Address: <input width="500" class="alert" placeholder=" http://hackathon.algodev.network:9100" @bind="algo_address" /></div>
+<div style="width:100%" class=" border-dark">API Token: <input width="500" class="alert" placeholder="ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1" @bind="algo_api_token" /></div>
 <div class=" border-dark">Source Phrase: <input class="alert" placeholder="Secret Phrase..." @bind="sourcePhrase" /></div>
 <div class=" border-dark">Token Name: <input class="alert" placeholder="Token Name..." @bind="tokenName" /></div>
 <div class=" border-dark">Unit Name: <input class="alert" placeholder="ABC,XYZ,..." @bind="unitName" /></div>
@@ -36,8 +37,8 @@
     private string algoStatusMsg { get; set; }
     private string algoTxSuccess { get; set; }
 
-    static string algo_address = "http://hackathon.algodev.network:9100";
-    static string algo_api_token = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
+    static string algo_address { get; set; } = "http://hackathon.algodev.network:9100";
+    static string algo_api_token { get; set; } = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
 
     private void createNewToken()
     {
